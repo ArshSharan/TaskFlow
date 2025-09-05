@@ -27,7 +27,7 @@ A modern, full-featured task management web application built with Django, Maria
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/ArshSharan/Django-MariaDB-App.git
 cd Django-MariaDB-App
 ```
 
@@ -125,4 +125,8 @@ This project is licensed under the MIT License.
 ## 💡 Credits
 
 - Built with [Django](https://www.djangoproject.com/) and [MariaDB](https://mariadb.org/)
+<<<<<<< HEAD
 - UI inspired by modern productivity tools
+=======
+- UI inspired by modern productivity tools
+>>>>>>> e014b0b66768b8ca9bd0f4899528ec5d68d8fd08
