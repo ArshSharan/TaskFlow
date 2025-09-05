@@ -33,8 +33,35 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# Database configuration for TiDB (already configured in main settings.py)
-# No changes needed as TiDB connection details are in .env
+# Database configuration for TiDB with SSL certificate handling
+import tempfile
+import base64
+
+def create_ssl_cert_from_env():
+    """Create SSL certificate file from environment variable for TiDB connection"""
+    cert_content = os.environ.get('TIDB_SSL_CERT_B64')
+    if cert_content:
+        # Decode base64 content
+        cert_decoded = base64.b64decode(cert_content).decode('utf-8')
+        
+        # Create temporary certificate file
+        cert_file = tempfile.NamedTemporaryFile(mode='w+', suffix='.pem', delete=False)
+        cert_file.write(cert_decoded)
+        cert_file.close()
+        
+        return cert_file.name
+    return None
+
+# Create SSL certificate file for TiDB if in production
+if 'TIDB_SSL_CERT_B64' in os.environ:
+    ssl_cert_path = create_ssl_cert_from_env()
+    if ssl_cert_path:
+        # Update database configuration to use the certificate
+        DATABASES['default']['OPTIONS'] = {
+            'ssl': {
+                'ca': ssl_cert_path
+            }
+        }
 
 # Media files
 MEDIA_URL = '/media/'
