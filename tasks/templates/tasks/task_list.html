@@ -1,0 +1,3876 @@
+{% extends 'tasks/base.html' %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <main class="dashboard-main">
+        <div class="dashboard-stats">
+                <div class="stat-card pending">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-info">
+                        <h3>Pending</h3>
+                        <p class="stat-count" id="pendingCount">0</p>
+                    </div>
+                    <div class="stat-progress">
+                        <div class="progress-bar pending-progress" id="pendingProgress"></div>
+                    </div>
+                </div>
+                <div class="stat-card in-progress">
+                    <div class="stat-icon"><i class="fas fa-spinner"></i></div>
+                    <div class="stat-info">
+                        <h3>In Progress</h3>
+                        <p class="stat-count" id="inProgressCount">0</p>
+                    </div>
+                    <div class="stat-progress">
+                        <div class="progress-bar progress-progress" id="progressProgress"></div>
+                    </div>
+                </div>
+                <div class="stat-card completed">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h3>Completed</h3>
+                        <p class="stat-count" id="completedCount">0</p>
+                    </div>
+                    <div class="stat-progress">
+                        <div class="progress-bar completed-progress" id="completedProgress"></div>
+                    </div>
+                </div>
+                <div class="stat-card productivity">
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-info">
+                        <h3>Productivity</h3>
+                        <p class="stat-count" id="productivityScore">0%</p>
+                    </div>
+                    <div class="stat-progress">
+                        <div class="progress-bar productivity-progress" id="productivityProgress"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div class="dashboard-bg">
+        <div class="dashboard-content">
+            <div class="task-form card">
+                <h2><i class="fas fa-plus-circle"></i> Add New Task</h2>
+                <form id="taskForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="title">Task Title</label>
+                            <input type="text" id="title" placeholder="Enter task title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="priority">Priority</label>
+                            <select id="priority">
+                                <option value="low">🟢 Low Priority</option>
+                                <option value="medium" selected>🟡 Medium Priority</option>
+                                <option value="high">🔴 High Priority</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category">
+                                <option value="work">💼 Work</option>
+                                <option value="personal">👤 Personal</option>
+                                <option value="health">🏥 Health</option>
+                                <option value="education">📚 Education</option>
+                                <option value="shopping">🛒 Shopping</option>
+                                <option value="other">📋 Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="due_date">Due Date</label>
+                            <input type="date" id="due_date">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" placeholder="Enter task description"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status">
+                                <option value="pending">⏳ Pending</option>
+                                <option value="in_progress">⏱️ In Progress</option>
+                                <option value="completed">✅ Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" onclick="createTask()"><i class="fas fa-plus"></i> Add Task</button>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Quick Actions Panel -->
+                <div class="quick-actions">
+                    <div class="quick-actions-header">
+                        <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                        <button class="customize-btn" onclick="openModal('quickActionsModal')">
+                            <i class="fas fa-cog"></i> Customize
+                        </button>
+                    </div>
+                    <div class="quick-buttons" id="quickButtonsContainer">
+                        <!-- Quick actions will be dynamically loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="task-list-section">
+            <div class="task-list-header">
+                <h2>Your Tasks</h2>
+                <div class="header-controls">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchTasks" placeholder="Search tasks..." class="search-input">
+                    </div>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="card" title="Card View">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button class="view-btn" data-view="list" title="List View">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                    <div class="sort-dropdown">
+                        <select id="sortTasks" class="sort-select">
+                            <option value="created_desc">Newest First</option>
+                            <option value="created_asc">Oldest First</option>
+                            <option value="priority">Priority</option>
+                            <option value="due_date">Due Date</option>
+                            <option value="alphabetical">A-Z</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="task-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="in_progress">In Progress</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+                <button class="filter-btn" data-filter="high">High Priority</button>
+                <button class="filter-btn" data-filter="overdue">Overdue</button>
+            </div>
+            <div class="task-list" id="taskList"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-user-edit"></i> Edit Profile</h2>
+            <button class="close-btn" onclick="closeModal('editProfileModal')">&times;</button>
+        </div>
+        <form id="editProfileForm">
+            <div class="form-group">
+                <label for="avatarInput">Profile Photo</label>
+                <div class="photo-upload-container">
+                    <div class="photo-preview" id="photoPreview">
+                        <img id="previewImage" src="" alt="Profile Preview" style="display: none;">
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <i class="fas fa-camera"></i>
+                            <p>Drop your photo here or <span class="upload-link">browse</span></p>
+                            <small>Supports JPG, PNG, GIF up to 5MB</small>
+                        </div>
+                    </div>
+                    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                    <div class="photo-upload-actions">
+                        <button type="button" class="upload-btn" onclick="document.getElementById('avatarInput').click()">
+                            <i class="fas fa-upload"></i> Choose Photo
+                        </button>
+                        <button type="button" class="remove-photo-btn" id="removePhotoBtn" style="display: none;">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="editFullName">Full Name</label>
+                <input type="text" id="editFullName" value="{{ user.get_full_name|default:user.username }}">
+            </div>
+            <div class="form-group">
+                <label for="editEmail">Email</label>
+                <input type="email" id="editEmail" value="{{ user.email }}">
+            </div>
+            <div class="form-group">
+                <label for="editBio">Bio</label>
+                <textarea id="editBio" placeholder="Tell us about yourself..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" onclick="closeModal('editProfileModal')" class="btn-secondary">Cancel</button>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="changePasswordModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-key"></i> Change Password</h2>
+            <button class="close-btn" onclick="closeModal('changePasswordModal')">&times;</button>
+        </div>
+        <form id="changePasswordForm">
+            <div class="form-group">
+                <label for="currentPassword">Current Password</label>
+                <input type="password" id="currentPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" onclick="closeModal('changePasswordModal')" class="btn-secondary">Cancel</button>
+                <button type="submit" class="btn-primary">Update Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Password Error Modal -->
+<div id="passwordErrorModal" class="modal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <div class="modal-header">
+            <h2 style="color: #dc3545; margin-bottom: 0;"><i class="fas fa-exclamation-triangle"></i> Incorrect Password</h2>
+            <button class="close-btn" onclick="closeModal('passwordErrorModal')">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 30px 20px;">
+            <div style="font-size: 64px; color: #dc3545; margin-bottom: 20px;">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h3 style="color: #333; margin-bottom: 15px;">Current Password Incorrect</h3>
+            <p style="color: #666; margin-bottom: 25px;">The current password you entered is not correct. Please try again with the right password.</p>
+            <button onclick="closeModal('passwordErrorModal')" class="btn-primary" style="background: #dc3545; border-color: #dc3545;">
+                <i class="fas fa-check"></i> Try Again
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Password Success Modal -->
+<div id="passwordSuccessModal" class="modal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <div class="modal-header">
+            <h2 style="color: #28a745; margin-bottom: 0;"><i class="fas fa-check-circle"></i> Password Changed</h2>
+            <button class="close-btn" onclick="closeModal('passwordSuccessModal')">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 30px 20px;">
+            <div style="font-size: 64px; color: #28a745; margin-bottom: 20px;">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 style="color: #333; margin-bottom: 15px;">Password Successfully Changed!</h3>
+            <p style="color: #666; margin-bottom: 25px;">Your password has been updated successfully. You will be logged out in a few seconds for security.</p>
+            <button onclick="closeModal('passwordSuccessModal')" class="btn-primary" style="background: #28a745; border-color: #28a745;">
+                <i class="fas fa-thumbs-up"></i> Great!
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Customizer Modal -->
+<div id="quickActionsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-bolt"></i> Customize Quick Actions</h2>
+            <button class="close-btn" onclick="closeModal('quickActionsModal')">&times;</button>
+        </div>
+        <div class="customizer-content">
+            <div class="current-actions">
+                <h3>Current Quick Actions</h3>
+                <div id="currentQuickActions" class="quick-actions-list">
+                    <!-- Current actions will be loaded here -->
+                </div>
+            </div>
+            <div class="action-form">
+                <h3>Add New Quick Action</h3>
+                <form id="newQuickActionForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="actionTitle">Title</label>
+                            <input type="text" id="actionTitle" placeholder="e.g., Morning Workout" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="actionIcon">Icon</label>
+                            <select id="actionIcon" required>
+                                <option value="fas fa-coffee">☕ Coffee</option>
+                                <option value="fas fa-dumbbell">🏋️ Exercise</option>
+                                <option value="fas fa-book">📚 Reading</option>
+                                <option value="fas fa-envelope">📧 Email</option>
+                                <option value="fas fa-users">👥 Meeting</option>
+                                <option value="fas fa-shopping-cart">🛒 Shopping</option>
+                                <option value="fas fa-heart">❤️ Health</option>
+                                <option value="fas fa-code">💻 Coding</option>
+                                <option value="fas fa-music">🎵 Music</option>
+                                <option value="fas fa-car">🚗 Travel</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="actionCategory">Category</label>
+                        <select id="actionCategory" required>
+                            <option value="work">💼 Work</option>
+                            <option value="personal">👤 Personal</option>
+                            <option value="health">🏥 Health</option>
+                            <option value="education">📚 Education</option>
+                            <option value="shopping">🛒 Shopping</option>
+                            <option value="other">📋 Other</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-plus"></i> Add Quick Action
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" onclick="closeModal('quickActionsModal')" class="btn-secondary">Close</button>
+            <button type="button" onclick="saveQuickActions()" class="btn-primary">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="modal">
+    <div class="modal-content confirmation-modal">
+        <div class="modal-header confirmation-header">
+            <div class="confirmation-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2 id="confirmationTitle">Confirm Action</h2>
+        </div>
+        <div class="confirmation-body">
+            <p id="confirmationMessage">Are you sure you want to proceed?</p>
+        </div>
+        <div class="modal-actions confirmation-actions">
+            <button type="button" onclick="cancelConfirmation()" class="btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button type="button" onclick="proceedConfirmation()" class="btn-danger">
+                <i class="fas fa-check"></i> Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #6c63ff;
+    --primary-hover: #5548c8;
+    --success-color: #22c55e;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --background-color: #f8fafc;
+    --card-background: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --gradient-start: #6c63ff;
+    --gradient-end: #a084ee;
+}
+.dashboard-layout {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem 1.2rem;
+}
+.dashboard-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin: 0;
+}
+.stat-card {
+    background: white;
+    border-radius: 1.2rem;
+    box-shadow: 0 4px 16px -1px #6c63ff11;
+    padding: 1.2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    min-height: 100px;
+}
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--gradient-end));
+    opacity: 0.8;
+}
+.stat-card:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 24px -2px #a084ee33;
+}
+.stat-card .stat-icon {
+    font-size: 1.8rem;
+    border-radius: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    background: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%);
+    color: var(--primary-color);
+    box-shadow: 0 2px 8px #6c63ff11;
+    width: fit-content;
+    align-self: flex-start;
+}
+.stat-card.pending .stat-icon { color: #f59e0b; }
+.stat-card.in-progress .stat-icon { color: #2563eb; }
+.stat-card.completed .stat-icon { color: #22c55e; }
+.stat-card.productivity .stat-icon { color: #8b5cf6; }
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    flex: 1;
+    gap: 0.3rem;
+}
+.stat-info h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
+    line-height: 1.2;
+}
+.stat-count {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1;
+}
+.stat-progress {
+    height: 4px;
+    background: #f1f5f9;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.progress-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+.pending-progress { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.progress-progress { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+.completed-progress { background: linear-gradient(90deg, #22c55e, #16a34a); }
+.productivity-progress { background: linear-gradient(90deg, #8b5cf6, #a855f7); }
+.dashboard-content {
+    display: flex;
+    gap: 2.5rem;
+    align-items: flex-start;
+}
+.task-form.card {
+    background: var(--card-background);
+    border-radius: 1.2rem;
+    box-shadow: 0 4px 16px -1px #6c63ff11;
+    padding: 2.2rem 2rem;
+    width: 100%;
+    max-width: none;
+    flex-shrink: 0;
+    height: fit-content;
+}
+.task-form.card h2 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.quick-actions {
+    margin-top: 1.2rem;
+    padding-top: 1.2rem;
+    border-top: 2px solid var(--border-color);
+}
+.quick-actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+}
+.quick-actions-header h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.customize-btn {
+    background: transparent;
+    border: 2px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.customize-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(108, 99, 255, 0.05);
+}
+.quick-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.6rem;
+}
+.quick-btn {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 0.8rem;
+    padding: 0.7rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    text-align: center;
+}
+.quick-btn:hover {
+    background: linear-gradient(135deg, var(--primary-color), var(--gradient-end));
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+.quick-btn i {
+    font-size: 1.2rem;
+}
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.search-container i {
+    position: absolute;
+    left: 0.8rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+.search-input {
+    padding: 0.6rem 0.8rem 0.6rem 2.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.7rem;
+    font-size: 0.9rem;
+    width: 200px;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+}
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px #6c63ff22;
+    background: white;
+}
+.view-toggle {
+    display: flex;
+    border: 2px solid var(--border-color);
+    border-radius: 0.7rem;
+    overflow: hidden;
+}
+.view-btn {
+    background: transparent;
+    border: none;
+    padding: 0.6rem 0.8rem;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.view-btn.active, .view-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+.sort-select {
+    padding: 0.6rem 0.8rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.7rem;
+    font-size: 0.9rem;
+    background: #f8fafc;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.sort-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px #6c63ff22;
+    background: white;
+}
+.form-group {
+    margin-bottom: 1.4rem;
+    flex: 1;
+}
+.form-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.4rem;
+}
+.form-row .form-group {
+    margin-bottom: 0;
+}
+.form-row .form-group:last-child button {
+    margin-top: 1.9rem;
+    width: 100%;
+    height: 46px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+input, textarea, select {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.75rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+    box-shadow: 0 2px 8px rgba(108, 99, 255, 0.05);
+}
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+    transform: translateY(-1px);
+    background: white;
+}
+select {
+    cursor: pointer;
+    background: white url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") no-repeat right 0.75rem center/1.5em 1.5em;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 3rem;
+}
+select:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.15);
+}
+select option {
+    padding: 0.75rem;
+    background: white;
+    color: var(--text-primary);
+}
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Photo Upload Styles */
+.photo-upload-container {
+    margin-bottom: 1rem;
+}
+
+.photo-preview {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    border: 2px dashed var(--border-color);
+    border-radius: 1rem;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.photo-preview:hover {
+    border-color: var(--primary-color);
+    background: rgba(108, 99, 255, 0.05);
+}
+
+.photo-preview.dragover {
+    border-color: var(--primary-color);
+    background: rgba(108, 99, 255, 0.15);
+    border-style: solid;
+    border-width: 3px;
+    transform: scale(1.02);
+    box-shadow: 0 4px 20px rgba(108, 99, 255, 0.3);
+}
+
+.photo-preview.dragover .upload-placeholder {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.photo-preview.dragover .upload-placeholder i {
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.upload-placeholder {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+}
+
+.upload-placeholder i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.upload-placeholder p {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.upload-placeholder small {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.upload-link {
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.upload-link:hover {
+    color: var(--primary-hover);
+}
+
+#previewImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.8rem;
+}
+
+.photo-upload-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.upload-btn, .remove-photo-btn {
+    padding: 0.7rem 1.2rem;
+    border-radius: 0.7rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    font-size: 0.9rem;
+    flex: 1;
+    justify-content: center;
+}
+
+.upload-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--gradient-end));
+    color: white;
+}
+
+.upload-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(108, 99, 255, 0.3);
+}
+
+.remove-photo-btn {
+    background: #f1f5f9;
+    color: var(--danger-color);
+    border: 2px solid var(--border-color);
+}
+
+.remove-photo-btn:hover {
+    background: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+}
+
+/* Confirmation Modal Styles */
+.confirmation-modal {
+    max-width: 450px;
+    text-align: center;
+}
+
+.confirmation-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 1rem;
+}
+
+.confirmation-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.confirmation-icon i {
+    font-size: 1.8rem;
+    color: #f59e0b;
+}
+
+.confirmation-header h2 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+}
+
+.confirmation-body {
+    padding: 1.5rem 2rem;
+    text-align: center;
+}
+
+.confirmation-body p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.confirmation-actions {
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-top: 2px solid var(--border-color);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--danger-color), #dc2626);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+button[type="submit"] {
+    background: linear-gradient(135deg, var(--primary-color), var(--gradient-end));
+    color: white;
+    border: none;
+    padding: 0.9rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+    box-shadow: 0 4px 16px rgba(108, 99, 255, 0.25);
+}
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108, 99, 255, 0.35);
+}
+/* Add Task Button Styling */
+button[onclick="createTask()"] {
+    background: linear-gradient(135deg, var(--primary-color), var(--gradient-end));
+    color: white;
+    border: none;
+    padding: 0.9rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 1.9rem;
+    height: 46px;
+    box-shadow: 0 4px 16px rgba(108, 99, 255, 0.25);
+}
+button[onclick="createTask()"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108, 99, 255, 0.35);
+    background: linear-gradient(135deg, #5b52ff, #9084ff);
+}
+.task-list-section {
+    flex: 1;
+    background: var(--card-background);
+    border-radius: 1.2rem;
+    box-shadow: 0 4px 16px -1px #6c63ff11;
+    padding: 2rem 1.5rem;
+}
+.task-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 1.5px solid var(--border-color);
+    background: transparent;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.task-list-header h2 {
+    font-size: 1.35rem;
+    color: var(--text-primary);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin: 0;
+}
+.task-filters {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+.filter-btn {
+    padding: 0.6rem 1.3rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 0.7rem;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 0;
+}
+.filter-btn:hover, .filter-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+.task-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.task-list.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.task-list.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.task-list.list-view .task-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 0;
+    border-radius: 0.8rem;
+}
+
+.task-list.list-view .task-header {
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    grid-column: 1;
+}
+
+.task-list.list-view .task-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.task-list.list-view .task-badges {
+    margin-top: 0;
+    margin-left: 1rem;
+    gap: 0.5rem;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+}
+
+.task-list.list-view .task-description {
+    display: none;
+}
+
+.task-list.list-view .task-status {
+    grid-column: 2;
+    margin: 0;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.task-list.list-view .task-actions {
+    grid-column: 3;
+    margin-top: 0;
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.task-list.list-view .task-actions button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.task-list.list-view .priority-badge,
+.task-list.list-view .category-badge,
+.task-list.list-view .due-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+}
+.task-item {
+    background: var(--card-background);
+    border-radius: 1.5rem;
+    padding: 1.8rem 1.5rem;
+    box-shadow: 0 4px 24px -2px #6c63ff11;
+    border: 2px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+.task-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px -4px #6c63ff22;
+}
+.task-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--text-secondary);
+    transition: background-color 0.2s ease;
+}
+.task-item.pending::before {
+    background: linear-gradient(180deg, #f59e0b, #fbbf24);
+}
+.task-item.in_progress::before {
+    background: linear-gradient(180deg, #2563eb, #3b82f6);
+}
+.task-item.completed::before {
+    background: linear-gradient(180deg, #22c55e, #16a34a);
+}
+.task-item.high-priority {
+    border-color: #ef4444;
+    background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
+}
+.task-item.overdue {
+    border-color: #dc2626;
+    background: linear-gradient(135deg, #fff 0%, #fef1f1 100%);
+}
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.8rem;
+}
+.task-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+.task-title i {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+.task-badges {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.priority-badge, .category-badge, .due-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.priority-badge.high { background: #fef2f2; color: #dc2626; }
+.priority-badge.medium { background: #fefce8; color: #ca8a04; }
+.priority-badge.low { background: #f0fdf4; color: #16a34a; }
+.category-badge {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+}
+.due-badge {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+.due-badge.overdue {
+    background: #fef2f2;
+    color: #dc2626;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    overflow-y: auto;
+    padding: 1rem;
+}
+.modal-content {
+    background: white;
+    margin: 2rem auto;
+    border-radius: 1.5rem;
+    width: 95%;
+    max-width: 800px;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+@keyframes modalSlideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid var(--border-color);
+}
+.modal-header h2 {
+    color: var(--primary-color);
+    margin: 0;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.2rem;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+.close-btn:hover {
+    background: #f1f5f9;
+    color: var(--text-primary);
+}
+.modal-content form {
+    padding: 2rem;
+}
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-top: 2px solid var(--border-color);
+}
+.btn-primary, .btn-secondary {
+    padding: 0.7rem 1.5rem;
+    border-radius: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    font-size: 0.9rem;
+}
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--gradient-end));
+    color: white;
+}
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px -1px #a084ee33;
+}
+.btn-secondary {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+}
+.btn-secondary:hover {
+    background: white;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+.customizer-content {
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+.current-actions h3, .action-form h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+.quick-actions-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+.quick-action-item {
+    background: #f8fafc;
+    border: 2px solid var(--border-color);
+    border-radius: 0.8rem;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+.quick-action-item:hover {
+    border-color: var(--primary-color);
+    background: white;
+}
+.action-info {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+.action-info i {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+.action-info span {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+.remove-action-btn {
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+.remove-action-btn:hover {
+    background: #dc2626;
+    transform: scale(1.1);
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 0.8rem;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1001;
+    border-left: 4px solid;
+    max-width: 350px;
+}
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+.toast-success {
+    border-left-color: var(--success-color);
+}
+.toast-success i {
+    color: var(--success-color);
+}
+.toast-error {
+    border-left-color: var(--danger-color);
+}
+.toast-error i {
+    color: var(--danger-color);
+}
+.toast-info {
+    border-left-color: var(--primary-color);
+}
+.toast-info i {
+    color: var(--primary-color);
+}
+.toast span {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Report Modal Styles */
+.report-content {
+    padding: 1.5rem;
+}
+.report-content h3 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.report-stats {
+    display: grid;
+    gap: 1rem;
+}
+.report-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.8rem;
+    border-left: 4px solid var(--primary-color);
+}
+.report-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.report-value {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+/* Enhanced form styles */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    outline: none;
+}
+
+/* Loading states */
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.btn-primary.loading {
+    position: relative;
+}
+.btn-primary.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.task-description {
+    color: var(--text-secondary);
+    margin-bottom: 0.7rem;
+    line-height: 1.5;
+}
+.task-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.22rem 0.7rem;
+    border-radius: 1rem;
+    font-size: 0.93rem;
+    font-weight: 500;
+    margin-bottom: 0.7rem;
+}
+.task-status.pending {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+}
+.task-status.in_progress {
+    background: var(--warning-color);
+    color: #92400e;
+}
+.task-status.completed {
+    background: var(--success-color);
+    color: #166534;
+}
+.task-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+.btn-delete {
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-delete:hover {
+    background: #dc2626;
+}
+.btn-status {
+    background: var(--warning-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-status:hover {
+    background: #d97706;
+}
+.btn-complete {
+    background: var(--success-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-complete:hover {
+    background: #16a34a;
+}
+.task-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.7rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.93rem;
+}
+.task-meta i {
+    font-size: 0.93rem;
+}
+.empty-state {
+    text-align: center;
+    padding: 2.5rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px -1px #6c63ff11;
+    color: var(--text-secondary);
+}
+.empty-state i {
+    font-size: 2.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+.dashboard-bg {
+    background: linear-gradient(135deg, #f8fafc 60%, #e0e7ff 100%);
+    border-radius: 2rem;
+    box-shadow: 0 8px 32px -8px #6c63ff11;
+    padding: 2.5rem 2.2rem;
+    margin-top: 0;
+}
+.task-list-section {
+    flex: 1;
+    background: var(--card-background);
+    border-radius: 1.2rem;
+    box-shadow: 0 4px 16px -1px #6c63ff11;
+    padding: 2.2rem 2rem;
+    margin-top: 2.5rem;
+}
+@media (max-width: 1200px) {
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    .stat-card {
+        min-height: 110px;
+        padding: 1.3rem 1rem;
+    }
+    .stat-card .stat-icon {
+        font-size: 1.6rem;
+        padding: 0.5rem 0.7rem;
+    }
+    .stat-count {
+        font-size: 1.4rem;
+    }
+    .header-controls {
+        flex-wrap: wrap;
+        gap: 0.8rem;
+    }
+    .search-input {
+        width: 160px;
+    }
+    .form-row {
+        gap: 1.2rem;
+    }
+    .dashboard-content {
+        gap: 2rem;
+    }
+    .quick-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .task-list {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+}
+@media (max-width: 1100px) {
+    .dashboard-content {
+        flex-direction: column;
+        gap: 0;
+    }
+    .task-form.card {
+        width: 100%;
+        max-width: none;
+        padding: 2rem 1.8rem;
+    }
+    .task-list-section {
+        margin-top: 2.5rem;
+        padding: 2rem 1.8rem;
+    }
+    .dashboard-bg {
+        padding: 2rem 1.8rem;
+    }
+    .task-list {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+    .task-item {
+        padding: 1.5rem 1.2rem;
+    }
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    .form-row .form-group {
+        margin-bottom: 1.4rem;
+    }
+    .form-row .form-group:last-child button {
+        margin-top: 0;
+        height: 44px;
+    }
+}
+@media (max-width: 800px) {
+    .dashboard-layout {
+        padding: 1rem 0.5rem;
+    }
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    .dashboard-content {
+        flex-direction: column;
+        gap: 0;
+    }
+    .task-form.card, .task-list-section {
+        width: 100%;
+    }
+    .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.8rem;
+    }
+    .search-input {
+        width: 100%;
+    }
+    .task-filters {
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .filter-btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    .quick-buttons {
+        grid-template-columns: 1fr;
+        gap: 0.6rem;
+    }
+    .task-badges {
+        margin-top: 0.5rem;
+    }
+    
+    .task-list {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+    
+    .view-toggle {
+        order: -1;
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .header-controls {
+        flex-wrap: wrap;
+    }
+    
+    /* List view tablet adjustments */
+    .task-list.list-view .task-item {
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+    }
+    
+    .task-list.list-view .task-status {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    
+    .task-list.list-view .task-actions {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        margin-top: 0.5rem;
+        justify-self: stretch;
+    }
+    
+    /* Modal responsive adjustments */
+    .modal-content {
+        max-width: 95%;
+        margin: 1rem auto;
+    }
+    .customizer-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    /* Confirmation modal responsive */
+    .confirmation-modal {
+        max-width: 90%;
+    }
+    
+    .confirmation-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .confirmation-actions .btn-secondary,
+    .confirmation-actions .btn-danger {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Photo upload responsive */
+    .photo-preview {
+        height: 150px;
+    }
+    
+    .photo-upload-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* Additional responsive breakpoints */
+@media (max-width: 480px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .task-item {
+        padding: 1.2rem 1rem;
+    }
+    
+    .stat-card {
+        padding: 1rem 0.8rem;
+    }
+    
+    .dashboard-layout {
+        padding: 0.5rem;
+    }
+    
+    /* Photo upload mobile */
+    .photo-preview {
+        height: 120px;
+    }
+    
+    .upload-placeholder {
+        padding: 1rem;
+    }
+    
+    .upload-placeholder i {
+        font-size: 2rem;
+    }
+    
+    .photo-upload-actions {
+        flex-direction: column;
+    }
+    
+    /* List view mobile adjustments */
+    .task-list.list-view .task-item {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+        padding: 1rem;
+    }
+    
+    .task-list.list-view .task-header {
+        grid-column: 1;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .task-list.list-view .task-badges {
+        margin-left: 0;
+        flex-wrap: wrap;
+    }
+    
+    .task-list.list-view .task-status {
+        grid-column: 1;
+        justify-self: start;
+    }
+    
+    .task-list.list-view .task-actions {
+        grid-column: 1;
+        justify-self: stretch;
+    }
+    
+    .task-list.list-view .task-actions button {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+/* Password Error Modal Specific Styling */
+#passwordErrorModal .modal-content {
+    animation: errorShake 0.5s ease-in-out;
+    border: 2px solid #dc3545;
+    box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+#passwordErrorModal .fas.fa-lock {
+    animation: lockPulse 1s ease-in-out infinite;
+}
+
+@keyframes lockPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Password Success Modal Specific Styling */
+#passwordSuccessModal .modal-content {
+    animation: successBounce 0.6s ease-out;
+    border: 2px solid #28a745;
+    box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+}
+
+@keyframes successBounce {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+#passwordSuccessModal .fas.fa-shield-alt {
+    animation: shieldGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes shieldGlow {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.1); filter: brightness(1.2); }
+}
+</style>
+<script>
+function formatDate(dateString) {
+    const options = { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+}
+
+function isOverdue(dueDateString) {
+    if (!dueDateString) return false;
+    const dueDate = new Date(dueDateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return dueDate < today;
+}
+
+function getDaysUntilDue(dueDateString) {
+    if (!dueDateString) return null;
+    const dueDate = new Date(dueDateString);
+    const today = new Date();
+    const diffTime = dueDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+}
+
+function getPriorityEmoji(priority) {
+    const emojis = {
+        'high': '🔴',
+        'medium': '🟡',
+        'low': '🟢'
+    };
+    return emojis[priority] || '⚪';
+}
+
+function getCategoryEmoji(category) {
+    const emojis = {
+        'work': '💼',
+        'personal': '👤',
+        'health': '🏥',
+        'education': '📚',
+        'shopping': '🛒',
+        'other': '📋'
+    };
+    return emojis[category] || '📋';
+}
+
+let allTasks = [];
+let currentFilter = 'all';
+let currentView = 'card';
+let quickActions = [];
+let quickActionInProgress = {}; // Track which quick actions are being processed
+let quickActionCooldowns = {}; // Track cooldowns for quick actions
+const currentUserId = {{ user.id|default:'null' }};
+
+function updateDashboardStats(stats) {
+    // Update stat cards with real data from backend
+    const pendingCountEl = document.getElementById('pendingCount');
+    const inProgressCountEl = document.getElementById('inProgressCount');
+    const completedCountEl = document.getElementById('completedCount');
+    const productivityScoreEl = document.getElementById('productivityScore');
+    
+    if (pendingCountEl) pendingCountEl.textContent = stats.total_tasks - stats.completed_tasks - stats.in_progress_tasks;
+    if (inProgressCountEl) inProgressCountEl.textContent = stats.in_progress_tasks;
+    if (completedCountEl) completedCountEl.textContent = stats.completed_tasks;
+    if (productivityScoreEl) productivityScoreEl.textContent = stats.productivity + '%';
+    
+    // Update profile card total tasks count
+    const totalTasksCount = document.getElementById('totalTasksCount');
+    if (totalTasksCount) {
+        totalTasksCount.textContent = stats.total_tasks || 0;
+    }
+    
+    // Update progress bars
+    const total = stats.total_tasks || 1; // Avoid division by zero
+    updateProgressBar('pendingProgress', (stats.total_tasks - stats.completed_tasks - stats.in_progress_tasks) / total * 100);
+    updateProgressBar('progressProgress', stats.in_progress_tasks / total * 100);
+    updateProgressBar('completedProgress', stats.completed_tasks / total * 100);
+    updateProgressBar('productivityProgress', stats.productivity);
+}
+
+function updateProgressBar(id, percentage) {
+    const progressBar = document.getElementById(id);
+    if (progressBar) {
+        progressBar.style.width = percentage + '%';
+    }
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (document.body.contains(toast)) {
+                document.body.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function fetchTasks() {
+    fetch('/api/tasks/')
+        .then(response => response.json())
+        .then(tasks => {
+            allTasks = tasks;
+            renderTasks();
+            updateStatCounts();
+            
+            // Fetch dashboard stats
+            return fetch('/api/tasks/dashboard_stats/');
+        })
+        .then(response => response.json())
+        .then(stats => {
+            updateDashboardStats(stats);
+        })
+        .catch(error => {
+            console.error('Error fetching tasks:', error);
+            showToast('Error loading tasks', 'error');
+        });
+}
+
+    function previewProfilePhoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const profileAvatar = document.getElementById('profileAvatar');
+                const defaultAvatar = document.getElementById('defaultAvatar');
+                
+                if (profileAvatar && defaultAvatar) {
+                    // Hide the default icon
+                    defaultAvatar.style.display = 'none';
+                    
+                    // Set background image
+                    profileAvatar.style.backgroundImage = `url(${e.target.result})`;
+                    profileAvatar.style.backgroundSize = 'cover';
+                    profileAvatar.style.backgroundPosition = 'center';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Enhanced profile functionality with real API integration
+async function loadUserProfile() {
+        try {
+            const response = await fetch('/api/profile/me/');
+            if (response.ok) {
+                const profile = await response.json();
+                updateProfileDisplay(profile);
+            }
+        } catch (error) {
+            console.error('Error loading profile:', error);
+        }
+    }
+
+    function updateProfileDisplay(profile) {
+        // Update profile name in the profile card
+        const profileInfo = document.querySelector('.profile-info h2');
+        if (profileInfo && profile.name) {
+            profileInfo.textContent = profile.name;
+        }
+        
+        // Update profile photo
+        const profileImage = document.getElementById('profileImage');
+        const defaultAvatar = document.getElementById('defaultAvatar');
+        if (profile.profile_photo_url) {
+            if (profileImage) {
+                profileImage.src = profile.profile_photo_url;
+                profileImage.style.display = 'block';
+            }
+            if (defaultAvatar) {
+                defaultAvatar.style.display = 'none';
+            }
+        }
+        
+        // Update navbar profile avatar
+        const profileImageNav = document.getElementById('profileImageNav');
+        const defaultAvatarNav = document.getElementById('defaultAvatarNav');
+        const profileImageCardNav = document.getElementById('profileImageCardNav');
+        const navbarDefaultAvatar = document.getElementById('navbarDefaultAvatar');
+        
+        if (profile.profile_photo_url) {
+            if (profileImageNav) {
+                profileImageNav.src = profile.profile_photo_url;
+                profileImageNav.style.display = 'block';
+                defaultAvatarNav.style.display = 'none';
+            }
+            if (profileImageCardNav) {
+                profileImageCardNav.src = profile.profile_photo_url;
+                profileImageCardNav.style.display = 'block';
+                navbarDefaultAvatar.style.display = 'none';
+            }
+        }
+        
+        // Update bio if we add a bio display element later
+        const bioElement = document.querySelector('.profile-bio');
+        if (bioElement && profile.bio) {
+            bioElement.textContent = profile.bio;
+        }
+        
+        // Update navbar profile card bio
+        const profileCardBio = document.getElementById('profileCardBio');
+        if (profileCardBio) {
+            profileCardBio.textContent = profile.bio || 'Click Edit Profile to add a bio';
+            profileCardBio.style.fontStyle = profile.bio ? 'normal' : 'italic';
+        }
+        
+        // Populate edit profile form with current data
+        const editFullName = document.getElementById('editFullName');
+        const editEmail = document.getElementById('editEmail');
+        const editBio = document.getElementById('editBio');
+        
+        if (editFullName) {
+            editFullName.value = profile.display_name || profile.name || '';
+        }
+        if (editEmail && profile.user) {
+            editEmail.value = profile.user.email || '';
+        }
+        if (editBio) {
+            editBio.value = profile.bio || '';
+        }
+        
+        // Update navbar profile info
+        const navbarUsername = document.querySelector('.profile-dropdown .username');
+        const navbarEmail = document.querySelector('.profile-dropdown .email');
+        const profileCardName = document.getElementById('profileCardName');
+        const profileCardEmail = document.getElementById('profileCardEmail');
+        
+        if (navbarUsername) {
+            navbarUsername.textContent = profile.display_name || profile.name || profile.user?.username || '';
+        }
+        if (navbarEmail && profile.user) {
+            navbarEmail.textContent = profile.user.email || '';
+        }
+        if (profileCardName) {
+            profileCardName.textContent = profile.display_name || profile.name || profile.user?.username || '';
+        }
+        if (profileCardEmail && profile.user) {
+            profileCardEmail.textContent = profile.user.email || '';
+        }
+    }
+
+    async function saveProfile() {
+        const formData = new FormData();
+        const photoInput = document.getElementById('profile-photo');
+        const displayName = document.getElementById('display-name').value;
+        const bio = document.getElementById('bio').value;
+        
+        if (photoInput.files[0]) {
+            formData.append('profile_photo', photoInput.files[0]);
+        }
+        if (displayName) {
+            formData.append('display_name', displayName);
+        }
+        if (bio) {
+            formData.append('bio', bio);
+        }
+        
+        try {
+            const response = await fetch('/api/profile/update_profile/', {
+                method: 'PATCH',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            
+            if (response.ok) {
+                const updatedProfile = await response.json();
+                updateProfileDisplay(updatedProfile);
+                closeModal('edit-profile-modal');
+                showToast('Profile updated successfully!', 'success');
+                
+                // Clear form
+                document.getElementById('profile-form').reset();
+            } else {
+                showToast('Error updating profile', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            showToast('Error updating profile', 'error');
+        }
+    }
+
+    // Enhanced Quick Actions with API integration
+    async function loadQuickActions() {
+        try {
+            const response = await fetch('/api/quick-actions/');
+            if (response.ok) {
+                const actions = await response.json();
+                currentQuickActions = actions;
+                renderQuickActions();
+                renderQuickActionsList();
+            }
+        } catch (error) {
+            console.error('Error loading quick actions:', error);
+            // Fallback to default actions
+            renderQuickActions();
+            renderQuickActionsList();
+        }
+    }
+
+    async function addQuickAction() {
+        const icon = document.getElementById('action-icon').value;
+        const label = document.getElementById('action-label').value;
+        
+        if (!icon || !label) {
+            showToast('Please fill in all fields', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/quick-actions/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    icon: icon,
+                    label: label,
+                    action_type: 'custom',
+                    is_active: true
+                })
+            });
+            
+            if (response.ok) {
+                const newAction = await response.json();
+                await loadQuickActions(); // Reload actions
+                
+                // Clear form
+                document.getElementById('action-icon').value = '';
+                document.getElementById('action-label').value = '';
+                
+                showToast('Quick action added successfully!', 'success');
+            } else {
+                showToast('Error adding quick action', 'error');
+            }
+        } catch (error) {
+            console.error('Error adding quick action:', error);
+            showToast('Error adding quick action', 'error');
+        }
+    }
+
+    async function removeQuickAction(actionId) {
+        try {
+            const response = await fetch(`/api/quick-actions/${actionId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            
+            if (response.ok) {
+                await loadQuickActions(); // Reload actions
+                showToast('Quick action removed', 'success');
+            } else {
+                showToast('Error removing quick action', 'error');
+            }
+        } catch (error) {
+            console.error('Error removing quick action:', error);
+            showToast('Error removing quick action', 'error');
+        }
+    }
+
+    function renderQuickActions() {
+        const container = document.getElementById('quickButtonsContainer');
+        if (!container) {
+            console.warn('Quick actions container not found');
+            return;
+        }
+        
+        const actions = currentQuickActions.length > 0 ? currentQuickActions : getDefaultQuickActions();
+        
+        container.innerHTML = actions.map(action => `
+            <button class="quick-btn" onclick="handleQuickAction('${action.label}', '${action.action_type}')">
+                <i class="${action.icon}"></i>
+                <span>${action.label}</span>
+            </button>
+        `).join('');
+    }
+
+    function renderQuickActionsList() {
+        const container = document.querySelector('.quick-actions-list');
+        if (!container) {
+            console.warn('Quick actions list container not found');
+            return;
+        }
+        
+        const actions = currentQuickActions.length > 0 ? currentQuickActions : getDefaultQuickActions();
+        
+        container.innerHTML = actions.map(action => `
+            <div class="quick-action-item">
+                <div class="action-info">
+                    <i class="${action.icon}"></i>
+                    <span>${action.label}</span>
+                </div>
+                <button class="remove-action-btn" onclick="removeQuickAction(${action.id})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `).join('');
+    }
+
+    function getDefaultQuickActions() {
+        return [
+            { id: 'default-1', icon: 'fas fa-plus', label: 'Add Task', action_type: 'modal' },
+            { id: 'default-2', icon: 'fas fa-clock', label: 'Due Today', action_type: 'filter' },
+            { id: 'default-3', icon: 'fas fa-star', label: 'High Priority', action_type: 'filter' },
+            { id: 'default-4', icon: 'fas fa-chart-bar', label: 'Report', action_type: 'modal' }
+        ];
+    }
+
+    async function handleQuickAction(actionLabel, actionType) {
+        switch(actionType) {
+            case 'modal':
+                if (actionLabel === 'Add Task') {
+                    toggleModal();
+                } else if (actionLabel === 'Report') {
+                    await generateReport();
+                }
+                break;
+            case 'filter':
+                await applyQuickFilter(actionLabel);
+                break;
+            default:
+                showToast(`${actionLabel} action triggered`, 'info');
+        }
+    }
+
+    async function applyQuickFilter(filterType) {
+        try {
+            let filterParams = '';
+            
+            switch(filterType) {
+                case 'Due Today':
+                    filterParams = '?filter_type=due_date&filter_value=today';
+                    break;
+                case 'High Priority':
+                    filterParams = '?filter_type=priority&filter_value=high';
+                    break;
+                case 'Overdue':
+                    filterParams = '?filter_type=due_date&filter_value=overdue';
+                    break;
+                default:
+                    return;
+            }
+            
+            const response = await fetch(`/api/tasks/filter_tasks/${filterParams}`);
+            if (response.ok) {
+                const filteredTasks = await response.json();
+                allTasks = filteredTasks;
+                renderTasks();
+                showToast(`Showing ${filterType.toLowerCase()} tasks`, 'info');
+            }
+        } catch (error) {
+            console.error('Error filtering tasks:', error);
+            showToast('Error filtering tasks', 'error');
+        }
+    }
+
+    async function generateReport() {
+        try {
+            const response = await fetch('/api/tasks/dashboard_stats/');
+            if (response.ok) {
+                const stats = await response.json();
+                
+                const reportHtml = `
+                    <div class="report-content">
+                        <h3><i class="fas fa-chart-line"></i> Productivity Report</h3>
+                        <div class="report-stats">
+                            <div class="report-item">
+                                <span class="report-label">Total Tasks:</span>
+                                <span class="report-value">${stats.total_tasks}</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">Completed:</span>
+                                <span class="report-value">${stats.completed_tasks}</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">Productivity:</span>
+                                <span class="report-value">${stats.productivity}%</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">Recent Completed:</span>
+                                <span class="report-value">${stats.recent_completed}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Create temporary modal for report
+                showReportModal(reportHtml);
+            }
+        } catch (error) {
+            console.error('Error generating report:', error);
+            showToast('Error generating report', 'error');
+        }
+    }
+
+    function showReportModal(content) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-chart-bar"></i> Productivity Report</h2>
+                    <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+                </div>
+                ${content}
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="this.closest('.modal').remove()">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    // CSRF Token helper
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Enhanced task creation with real API
+    async function createTask() {
+        const title = document.getElementById('taskTitle').value;
+        const description = document.getElementById('taskDescription').value;
+        const priority = document.getElementById('taskPriority').value;
+        const category = document.getElementById('taskCategory').value;
+        const dueDate = document.getElementById('taskDueDate').value;
+        
+        if (!title.trim()) {
+            showToast('Please enter a task title', 'error');
+            return;
+        }
+        
+        const taskData = {
+            title: title.trim(),
+            description: description.trim(),
+            priority: priority,
+            category: category,
+            status: 'pending'
+        };
+        
+        if (dueDate) {
+            taskData.due_date = dueDate;
+        }
+        
+        try {
+            const response = await fetch('/api/tasks/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(taskData)
+            });
+            
+            if (response.ok) {
+                const newTask = await response.json();
+                allTasks.unshift(newTask);
+                renderTasks();
+                updateStatCounts();
+                
+                // Clear form and close modal
+                document.getElementById('taskForm').reset();
+                toggleModal();
+                
+                showToast('Task created successfully!', 'success');
+            } else {
+                const errorData = await response.json();
+                showToast('Error creating task: ' + (errorData.detail || 'Unknown error'), 'error');
+            }
+        } catch (error) {
+            console.error('Error creating task:', error);
+            showToast('Error creating task', 'error');
+        }
+    }
+
+    // Store current quick actions
+    let currentQuickActions = [];
+
+    // CSRF Token helper
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Essential missing functions that were in the original code
+    function createTask() {
+        const title = document.getElementById('title').value;
+        const description = document.getElementById('description').value;
+        const priority = document.getElementById('priority').value;
+        const category = document.getElementById('category').value;
+        const dueDate = document.getElementById('due_date').value;
+        
+        if (!title.trim()) {
+            showToast('Please enter a task title', 'error');
+            return;
+        }
+        
+        const taskData = {
+            title: title.trim(),
+            description: description.trim(),
+            priority: priority,
+            category: category,
+            status: 'pending'
+        };
+        
+        if (dueDate) {
+            taskData.due_date = dueDate;
+        }
+        
+        fetch('/api/tasks/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(taskData)
+        })
+        .then(response => response.json())
+        .then(newTask => {
+            allTasks.unshift(newTask);
+            renderTasks();
+            updateStatCounts();
+            
+            // Clear form and close modal
+            document.getElementById('taskForm').reset();
+            
+            showToast('Task created successfully!', 'success');
+        })
+        .catch(error => {
+            console.error('Error creating task:', error);
+            showToast('Error creating task', 'error');
+        });
+    }
+
+    function openEditProfile() {
+        openModal('editProfileModal');
+    }
+
+    function addQuickTask(title, category) {
+        console.log('addQuickTask called with:', { title, category });
+        
+        // Create a unique key for this specific task
+        const taskKey = `${title}_${category}`;
+        const buttonId = `quick-btn-${title.replace(/\s+/g, '-').toLowerCase()}`;
+        const button = document.getElementById(buttonId);
+        const now = Date.now();
+        
+        // Check if this exact task is already being processed
+        if (quickActionInProgress[taskKey]) {
+            console.log('Task already in progress, ignoring duplicate click');
+            showToast('Task is already being created...', 'info');
+            return;
+        }
+        
+        // Check for cooldown (prevent same task within 3 seconds)
+        if (quickActionCooldowns[taskKey] && (now - quickActionCooldowns[taskKey]) < 3000) {
+            console.log('Task in cooldown period, ignoring rapid click');
+            showToast('Please wait before creating the same task again', 'warning');
+            return;
+        }
+        
+        // Check if a task with the same title already exists and is pending
+        const existingTask = allTasks.find(task => 
+            task.title === title && 
+            task.status === 'pending' && 
+            task.category === category
+        );
+        
+        if (existingTask) {
+            console.log('Similar task already exists:', existingTask);
+            showToast(`Task "${title}" already exists in your pending list`, 'info');
+            return;
+        }
+        
+        // Mark this task as in progress and disable button
+        quickActionInProgress[taskKey] = true;
+        
+        if (button) {
+            button.disabled = true;
+            button.style.opacity = '0.6';
+            button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Creating...`;
+        }
+        
+        const taskData = {
+            title: title,
+            description: '',
+            priority: 'medium',
+            category: category,
+            status: 'pending'
+        };
+        
+        console.log('Sending task data:', taskData);
+        
+        fetch('/api/tasks/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(taskData)
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(newTask => {
+            console.log('New task created:', newTask);
+            allTasks.unshift(newTask);
+            renderTasks();
+            updateStatCounts();
+            showToast(`Quick task "${title}" created!`, 'success');
+            
+            // Set cooldown for this task
+            quickActionCooldowns[taskKey] = now;
+        })
+        .catch(error => {
+            console.error('Error creating quick task:', error);
+            showToast('Error creating quick task', 'error');
+        })
+        .finally(() => {
+            // Remove from in-progress tracking and restore button
+            delete quickActionInProgress[taskKey];
+            
+            if (button) {
+                button.disabled = false;
+                button.style.opacity = '1';
+                // Find the original action to restore the button content
+                const action = quickActions.find(a => a.label === title);
+                if (action) {
+                    button.innerHTML = `<i class="${action.icon}"></i> ${action.label}`;
+                }
+            }
+        });
+    }
+
+// Essential missing functions that were in the original code
+function toggleModal() {
+    const taskForm = document.querySelector('.task-form');
+    if (taskForm) {
+        if (taskForm.style.display === 'none') {
+            taskForm.style.display = 'block';
+        } else {
+            taskForm.style.display = 'none';
+        }
+    }
+}
+
+// Continue with the rest of the functions
+
+function renderTasks() {
+    const taskList = document.getElementById('taskList');
+    const searchTerm = document.getElementById('searchTasks')?.value.toLowerCase() || '';
+    const sortOption = document.getElementById('sortTasks')?.value || 'created_desc';
+    
+    let filteredTasks = allTasks.filter(task => {
+        // Search filter
+        const matchesSearch = task.title.toLowerCase().includes(searchTerm) || 
+                             (task.description && task.description.toLowerCase().includes(searchTerm));
+        
+        // Status/priority filter
+        let matchesFilter = true;
+        if (currentFilter === 'all') matchesFilter = true;
+        else if (currentFilter === 'high') matchesFilter = (task.priority === 'high');
+        else if (currentFilter === 'overdue') matchesFilter = isOverdue(task.due_date) && task.status !== 'completed';
+        else matchesFilter = (task.status === currentFilter);
+        
+        return matchesSearch && matchesFilter;
+    });
+    
+    // Sort tasks
+    filteredTasks.sort((a, b) => {
+        switch(sortOption) {
+            case 'created_desc': return new Date(b.created_at) - new Date(a.created_at);
+            case 'created_asc': return new Date(a.created_at) - new Date(b.created_at);
+            case 'priority': 
+                const priorityOrder = {'high': 3, 'medium': 2, 'low': 1};
+                return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+            case 'due_date': 
+                if (!a.due_date && !b.due_date) return 0;
+                if (!a.due_date) return 1;
+                if (!b.due_date) return -1;
+                return new Date(a.due_date) - new Date(b.due_date);
+            case 'alphabetical': return a.title.localeCompare(b.title);
+            default: return 0;
+        }
+    });
+    
+    taskList.innerHTML = '';
+    
+    if (filteredTasks.length === 0) {
+        taskList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-clipboard-list"></i>
+                <p>No tasks found. ${allTasks.length === 0 ? 'Add your first task to get started!' : 'Try adjusting your search or filters.'}</p>
+            </div>
+        `;
+        return;
+    }
+    
+    filteredTasks.forEach(task => {
+        const taskElement = document.createElement('div');
+        const isTaskOverdue = isOverdue(task.due_date) && task.status !== 'completed';
+        const daysUntilDue = getDaysUntilDue(task.due_date);
+        
+        let taskClasses = `task-item ${task.status}`;
+        if (task.priority === 'high') taskClasses += ' high-priority';
+        if (isTaskOverdue) taskClasses += ' overdue';
+        
+        taskElement.className = taskClasses;
+        
+        const statusText = {
+            'pending': 'Pending',
+            'in_progress': 'In Progress',
+            'completed': 'Completed'
+        }[task.status];
+        
+        const statusIcon = {
+            'pending': 'clock',
+            'in_progress': 'spinner',
+            'completed': 'check-circle'
+        }[task.status];
+        
+        const nextStatus = {
+            'pending': { text: 'Start', status: 'in_progress', class: 'btn-status', icon: 'play' },
+            'in_progress': { text: 'Complete', status: 'completed', class: 'btn-complete', icon: 'check' },
+            'completed': { text: 'Reset', status: 'pending', class: 'btn-status', icon: 'undo' }
+        }[task.status];
+        
+        let dueBadge = '';
+        if (task.due_date) {
+            const dueDateFormatted = new Date(task.due_date).toLocaleDateString();
+            if (isTaskOverdue) {
+                dueBadge = `<span class="due-badge overdue"><i class="fas fa-exclamation-triangle"></i> Overdue</span>`;
+            } else if (daysUntilDue <= 3 && daysUntilDue >= 0) {
+                dueBadge = `<span class="due-badge"><i class="fas fa-calendar-alt"></i> Due ${daysUntilDue === 0 ? 'today' : 'in ' + daysUntilDue + ' day' + (daysUntilDue > 1 ? 's' : '')}</span>`;
+            } else if (daysUntilDue > 3) {
+                dueBadge = `<span class="due-badge"><i class="fas fa-calendar"></i> Due ${dueDateFormatted}</span>`;
+            }
+        }
+        
+        taskElement.innerHTML = `
+            <div class="task-header">
+                <h3 class="task-title">
+                    <i class="fas fa-tasks"></i>
+                    ${task.title}
+                </h3>
+                <div class="task-badges">
+                    <span class="priority-badge ${task.priority || 'medium'}">
+                        ${getPriorityEmoji(task.priority)} ${(task.priority || 'medium').charAt(0).toUpperCase() + (task.priority || 'medium').slice(1)}
+                    </span>
+                    <span class="category-badge">
+                        ${getCategoryEmoji(task.category)} ${(task.category || 'other').charAt(0).toUpperCase() + (task.category || 'other').slice(1)}
+                    </span>
+                    ${dueBadge}
+                </div>
+            </div>
+            <p class="task-description">${task.description || 'No description provided'}</p>
+            <span class="task-status ${task.status}">
+                <i class="fas fa-${statusIcon}"></i>
+                ${statusText}
+            </span>
+            <div class="task-actions">
+                <button class="btn-delete" onclick="deleteTask(${task.id})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+                <button class="${nextStatus.class}" onclick="updateStatus(${task.id}, '${nextStatus.status}')">
+                    <i class="fas fa-${nextStatus.icon}"></i> ${nextStatus.text}
+                </button>
+            </div>
+            <div class="task-meta">
+                <span><i class="fas fa-calendar"></i> Created: ${formatDate(task.created_at)}</span>
+                <span><i class="fas fa-clock"></i> Updated: ${formatDate(task.updated_at)}</span>
+            </div>
+        `;
+        
+        taskList.appendChild(taskElement);
+    });
+}
+
+function updateStatCounts() {
+    let counts = {pending: 0, in_progress: 0, completed: 0, high_priority: 0, overdue: 0};
+    
+    allTasks.forEach(task => {
+        counts[task.status]++;
+        if (task.priority === 'high') counts.high_priority++;
+        if (isOverdue(task.due_date) && task.status !== 'completed') counts.overdue++;
+    });
+    
+    const total = allTasks.length;
+    const productivity = total > 0 ? Math.round((counts.completed / total) * 100) : 0;
+    
+    // Update counts
+    document.getElementById('pendingCount').textContent = counts.pending;
+    document.getElementById('inProgressCount').textContent = counts.in_progress;
+    document.getElementById('completedCount').textContent = counts.completed;
+    document.getElementById('productivityScore').textContent = productivity + '%';
+    
+    // Update progress bars
+    if (total > 0) {
+        document.getElementById('pendingProgress').style.width = (counts.pending / total * 100) + '%';
+        document.getElementById('progressProgress').style.width = (counts.in_progress / total * 100) + '%';
+        document.getElementById('completedProgress').style.width = (counts.completed / total * 100) + '%';
+        document.getElementById('productivityProgress').style.width = productivity + '%';
+    }
+}
+document.getElementById('taskForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const task = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        status: document.getElementById('status').value,
+        priority: document.getElementById('priority').value,
+        category: document.getElementById('category').value,
+        due_date: document.getElementById('due_date').value || null
+    };
+    fetch('/api/tasks/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(task)
+    })
+    .then(response => response.json())
+    .then(() => {
+        document.getElementById('taskForm').reset();
+        fetchTasks();
+        toggleModal(); // Close the task form modal
+        showToast('Task added successfully!', 'success');
+    })
+    .catch(() => {
+        showToast('Error adding task', 'error');
+    });
+});
+
+// Search functionality
+document.getElementById('searchTasks')?.addEventListener('input', function() {
+    renderTasks();
+});
+
+// Sort functionality
+document.getElementById('sortTasks')?.addEventListener('change', function() {
+    renderTasks();
+});
+
+// Filter functionality
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentFilter = this.dataset.filter;
+        renderTasks();
+    });
+});
+
+// View toggle functionality
+document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentView = this.dataset.view;
+        const taskList = document.getElementById('taskList');
+        
+        if (currentView === 'list') {
+            taskList.classList.add('list-view');
+            taskList.classList.remove('card-view');
+        } else {
+            taskList.classList.remove('list-view');
+            taskList.classList.add('card-view');
+        }
+        
+        // Save user preference
+        localStorage.setItem(`taskViewPreference_${currentUserId}`, currentView);
+    });
+});
+
+// Load saved view preference
+document.addEventListener('DOMContentLoaded', function() {
+    const savedView = localStorage.getItem(`taskViewPreference_${currentUserId}`) || 'card';
+    const taskList = document.getElementById('taskList');
+    const viewBtn = document.querySelector(`[data-view="${savedView}"]`);
+    
+    if (viewBtn) {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        viewBtn.classList.add('active');
+        currentView = savedView;
+        
+        if (currentView === 'list') {
+            taskList.classList.add('list-view');
+            taskList.classList.remove('card-view');
+        } else {
+            taskList.classList.remove('list-view');
+            taskList.classList.add('card-view');
+        }
+    }
+    
+    // Initialize photo upload as backup (in case modal opens before initialization)
+    console.log('DOM loaded, setting up backup photo upload initialization');
+    
+    // Add a mutation observer to watch for modal opens
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const modal = mutation.target;
+                if (modal.id === 'editProfileModal' && modal.style.display === 'block') {
+                    console.log('Edit profile modal opened, initializing photo upload');
+                    setTimeout(() => {
+                        initializePhotoUpload();
+                    }, 50);
+                }
+            }
+        });
+    });
+    
+    const editProfileModal = document.getElementById('editProfileModal');
+    if (editProfileModal) {
+        observer.observe(editProfileModal, { attributes: true });
+    }
+});
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#6c63ff'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 0.8rem;
+        box-shadow: 0 8px 32px -8px rgba(0,0,0,0.3);
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    `;
+    
+    const icon = type === 'success' ? 'fas fa-check-circle' : type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-info-circle';
+    notification.innerHTML = `<i class="${icon}"></i> ${message}`;
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto remove
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+function deleteTask(id) {
+    showConfirmation(
+        'Delete Task',
+        'Are you sure you want to delete this task? This action cannot be undone.',
+        function() {
+            // Confirmed - proceed with deletion
+            fetch(`/api/tasks/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(() => {
+                fetchTasks();
+                showToast('Task deleted successfully!', 'success');
+            })
+            .catch(() => {
+                showToast('Error deleting task', 'error');
+            });
+        }
+    );
+}
+
+function updateStatus(id, newStatus) {
+    fetch(`/api/tasks/${id}/`)
+        .then(response => response.json())
+        .then(task => {
+            task.status = newStatus;
+            return fetch(`/api/tasks/${id}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(task)
+            });
+        })
+        .then(() => {
+            fetchTasks();
+            const statusMessages = {
+                'pending': 'Task moved to pending',
+                'in_progress': 'Task started!',
+                'completed': 'Task completed! 🎉'
+            };
+            showNotification(statusMessages[newStatus], 'success');
+        })
+        .catch(() => {
+            showNotification('Error updating task status', 'error');
+        });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Global functions that need to be accessible to HTML onclick handlers
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Initialize photo upload for edit profile modal
+        if (modalId === 'editProfileModal') {
+            setTimeout(() => {
+                initializePhotoUpload();
+            }, 100);
+        }
+    } else {
+        console.error('Modal not found:', modalId);
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    } else {
+        console.error('Modal not found:', modalId);
+    }
+}
+
+// Confirmation Modal Functions
+let confirmationCallback = null;
+
+function showConfirmation(title, message, onConfirm, onCancel = null) {
+    const modal = document.getElementById('confirmationModal');
+    const titleElement = document.getElementById('confirmationTitle');
+    const messageElement = document.getElementById('confirmationMessage');
+    
+    if (!modal || !titleElement || !messageElement) {
+        console.error('Confirmation modal elements not found');
+        return;
+    }
+    
+    titleElement.textContent = title;
+    messageElement.textContent = message;
+    confirmationCallback = { onConfirm, onCancel };
+    
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function proceedConfirmation() {
+    const modal = document.getElementById('confirmationModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    if (confirmationCallback && confirmationCallback.onConfirm) {
+        confirmationCallback.onConfirm();
+    }
+    
+    confirmationCallback = null;
+}
+
+function cancelConfirmation() {
+    const modal = document.getElementById('confirmationModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    if (confirmationCallback && confirmationCallback.onCancel) {
+        confirmationCallback.onCancel();
+    }
+    
+    confirmationCallback = null;
+}
+
+function toggleModal() {
+    const modal = document.getElementById('taskModal');
+    if (modal.style.display === 'block') {
+        closeModal('taskModal');
+    } else {
+        openModal('taskModal');
+    }
+}
+
+function createTask() {
+    const title = document.getElementById('title').value;
+    const description = document.getElementById('description').value;
+    const priority = document.getElementById('priority').value;
+    const dueDate = document.getElementById('due_date').value;
+
+    if (!title.trim()) {
+        showToast('Please enter a task title', 'error');
+        return;
+    }
+
+    const taskData = {
+        title: title,
+        description: description,
+        priority: priority,
+        due_date: dueDate || null
+    };
+
+    fetch('/api/tasks/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(taskData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.id) {
+            showToast('Task created successfully!', 'success');
+            closeModal('taskModal');
+            document.getElementById('taskForm').reset();
+            fetchTasks(); // Refresh the task list
+        } else {
+            showToast('Error creating task', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error creating task', 'error');
+    });
+}
+
+function deleteTask(taskId) {
+    showConfirmation(
+        'Delete Task',
+        'Are you sure you want to delete this task? This action cannot be undone.',
+        function() {
+            // Confirmed - proceed with deletion
+            fetch(`/api/tasks/${taskId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    showToast('Task deleted successfully!', 'success');
+                    fetchTasks(); // Refresh the task list
+                } else {
+                    showToast('Error deleting task', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error deleting task', 'error');
+            });
+        }
+    );
+}
+
+function updateTaskStatus(taskId, newStatus) {
+    fetch(`/api/tasks/${taskId}/`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ status: newStatus })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.id) {
+            showToast('Task status updated!', 'success');
+            fetchTasks(); // Refresh the task list
+        } else {
+            showToast('Error updating task', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error updating task', 'error');
+    });
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    
+    toast.textContent = message;
+    toast.className = `toast show ${type}`;
+    
+    setTimeout(() => {
+        toast.className = 'toast';
+    }, 3000);
+}
+
+// Profile and Customization Functions
+function previewProfilePhoto(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const profileImage = document.getElementById('profileImage');
+            const defaultAvatar = document.getElementById('defaultAvatar');
+            
+            if (profileImage) {
+                profileImage.src = e.target.result;
+                profileImage.style.display = 'block';
+            }
+            if (defaultAvatar) {
+                defaultAvatar.style.display = 'none';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+async function saveProfile() {
+    const formData = new FormData();
+    const photoInput = document.getElementById('avatarInput');
+    const fullName = document.getElementById('editFullName').value;
+    const email = document.getElementById('editEmail').value;
+    const bio = document.getElementById('editBio').value;
+    
+    if (photoInput && photoInput.files[0]) {
+        formData.append('profile_photo', photoInput.files[0]);
+    }
+    
+    // Add user data
+    if (fullName) {
+        formData.append('display_name', fullName);
+    }
+    if (bio) {
+        formData.append('bio', bio);
+    }
+    
+    try {
+        // Update profile
+        const profileResponse = await fetch('/api/profile/update_profile/', {
+            method: 'PATCH',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+        
+        if (profileResponse.ok) {
+            const updatedProfile = await profileResponse.json();
+            
+            // Update user email if changed
+            if (email && email !== '{{ user.email }}') {
+                const userResponse = await fetch('/api/auth/update_user/', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        first_name: fullName.split(' ')[0] || '',
+                        last_name: fullName.split(' ').slice(1).join(' ') || ''
+                    })
+                });
+            }
+            
+            // Update display
+            loadUserProfile();
+            updateNavbarProfile(updatedProfile);
+            
+            closeModal('editProfileModal');
+            showToast('Profile updated successfully!', 'success');
+        } else {
+            const errorData = await profileResponse.json();
+            showToast(errorData.error || 'Error updating profile', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving profile:', error);
+        showToast('Error updating profile', 'error');
+    }
+}
+
+async function changePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showToast('All password fields are required', 'error');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        showToast('New passwords do not match', 'error');
+        return;
+    }
+    
+    if (newPassword.length < 8) {
+        showToast('New password must be at least 8 characters long', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/profile/change_password/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            closeModal('changePasswordModal');
+            document.getElementById('changePasswordForm').reset();
+            
+            // Show success modal instead of toast
+            openModal('passwordSuccessModal');
+            
+            // Force logout and redirect to login after password change
+            setTimeout(() => {
+                window.location.href = '/logout/';
+            }, 4000); // Give more time to see the success modal
+        } else {
+            // Check if it's a wrong current password error
+            if (response.status === 400 && data.error && data.error.includes('Current password is incorrect')) {
+                // Show the specific password error modal
+                openModal('passwordErrorModal');
+                // Clear the current password field
+                document.getElementById('currentPassword').value = '';
+                // Focus back on the current password field for retry
+                setTimeout(() => {
+                    document.getElementById('currentPassword').focus();
+                }, 500);
+            } else {
+                // Show generic error for other issues
+                showToast(data.error || 'Error changing password', 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Error changing password:', error);
+        showToast('Error changing password', 'error');
+    }
+}
+
+// Photo Upload Drag and Drop Functionality
+function initializePhotoUpload() {
+    const photoPreview = document.getElementById('photoPreview');
+    const avatarInput = document.getElementById('avatarInput');
+    const previewImage = document.getElementById('previewImage');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const removePhotoBtn = document.getElementById('removePhotoBtn');
+    
+    if (!photoPreview || !avatarInput) {
+        console.log('Photo upload elements not found');
+        return;
+    }
+    
+    console.log('Initializing photo upload drag and drop');
+    
+    // Store the file for later use
+    let currentFile = null;
+    
+    // Prevent default drag behaviors on the whole document
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        document.addEventListener(eventName, preventDefaults, false);
+        photoPreview.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    // Highlight drop area when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+        photoPreview.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        photoPreview.addEventListener(eventName, unhighlight, false);
+    });
+    
+    // Handle dropped files
+    photoPreview.addEventListener('drop', handleDrop, false);
+    
+    // Handle file selection via input
+    avatarInput.addEventListener('change', handleFileSelect);
+    
+    // Handle click to open file selector
+    photoPreview.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        avatarInput.click();
+    });
+    
+    // Remove photo functionality
+    if (removePhotoBtn) {
+        removePhotoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            removePhoto();
+        });
+    }
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function highlight(e) {
+        photoPreview.classList.add('dragover');
+        console.log('Drag highlight activated');
+    }
+    
+    function unhighlight(e) {
+        photoPreview.classList.remove('dragover');
+        console.log('Drag highlight removed');
+    }
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        console.log('Files dropped:', files.length);
+        
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    }
+    
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        console.log('File selected:', file);
+        if (file) {
+            handleFile(file);
+        }
+    }
+    
+    function handleFile(file) {
+        console.log('Processing file:', file.name, file.type, file.size);
+        
+        // Store the file
+        currentFile = file;
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            showToast('Please select an image file', 'error');
+            return;
+        }
+        
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('File size must be less than 5MB', 'error');
+            return;
+        }
+        
+        // Create file reader
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            console.log('File loaded successfully');
+            previewImage.src = e.target.result;
+            previewImage.style.display = 'block';
+            uploadPlaceholder.style.display = 'none';
+            removePhotoBtn.style.display = 'block';
+        };
+        reader.onerror = function(e) {
+            console.error('Error reading file:', e);
+            showToast('Error reading file', 'error');
+        };
+        reader.readAsDataURL(file);
+        
+        // Update the input element with the file
+        updateInputFile(file);
+        
+        showToast('Photo uploaded successfully', 'success');
+    }
+    
+    function updateInputFile(file) {
+        try {
+            // Modern approach using DataTransfer
+            if (typeof DataTransfer !== 'undefined') {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                avatarInput.files = dataTransfer.files;
+                console.log('File added to input via DataTransfer:', avatarInput.files.length);
+            } else {
+                throw new Error('DataTransfer not supported');
+            }
+        } catch (error) {
+            console.log('DataTransfer failed, using alternative method:', error);
+            
+            // Store file in a custom property for later retrieval
+            avatarInput._selectedFile = file;
+            
+            // Create a getter that returns our file
+            Object.defineProperty(avatarInput, 'files', {
+                get: function() {
+                    return this._selectedFile ? [this._selectedFile] : [];
+                },
+                configurable: true
+            });
+            
+            console.log('File stored in alternative method');
+        }
+    }
+    
+    function removePhoto() {
+        previewImage.src = '';
+        previewImage.style.display = 'none';
+        uploadPlaceholder.style.display = 'block';
+        removePhotoBtn.style.display = 'none';
+        avatarInput.value = '';
+        avatarInput._selectedFile = null;
+        currentFile = null;
+        console.log('Photo removed');
+    }
+    
+    // Expose current file for external access
+    photoPreview.getCurrentFile = () => currentFile;
+}
+
+function updateNavbarProfile(profile) {
+    // Update navbar profile display
+    const navbarUsername = document.querySelector('.profile-info .username');
+    const navbarEmail = document.querySelector('.profile-info .email');
+    
+    if (navbarUsername && profile.display_name) {
+        navbarUsername.textContent = profile.display_name;
+    }
+    
+    if (navbarEmail && profile.user && profile.user.email) {
+        navbarEmail.textContent = profile.user.email;
+    }
+}
+
+function addQuickAction() {
+    console.log('addQuickAction called');
+    
+    const title = document.getElementById('actionTitle').value;
+    const icon = document.getElementById('actionIcon').value;
+    const category = document.getElementById('actionCategory').value;
+    
+    console.log('Form values:', { title, icon, category });
+    
+    if (!title || !icon || !category) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    const newAction = { 
+        label: title,
+        icon: icon,
+        action_type: 'filter',
+        action_data: { category: category },
+        is_active: true
+    };
+    
+    console.log('Creating new action:', newAction);
+    
+    // Send to server
+    fetch('/api/quick-actions/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(newAction)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Action created:', data);
+        loadQuickActions().then(() => {
+            renderQuickActions();
+            renderQuickActionsList();
+        });
+        
+        // Clear form
+        document.getElementById('actionTitle').value = '';
+        document.getElementById('actionIcon').selectedIndex = 0;
+        document.getElementById('actionCategory').selectedIndex = 0;
+        
+        showToast('Quick action added successfully!', 'success');
+    })
+    .catch(error => {
+        console.error('Error creating action:', error);
+        showToast('Error adding quick action', 'error');
+    });
+}
+
+function removeQuickAction(actionId) {
+    // Send delete request to server
+    fetch(`/api/quick-actions/${actionId}/`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(() => {
+        loadQuickActions().then(() => {
+            renderQuickActions();
+            renderQuickActionsList();
+        });
+        showToast('Quick action removed', 'success');
+    })
+    .catch(error => {
+        console.error('Error removing action:', error);
+        showToast('Error removing quick action', 'error');
+    });
+}
+
+async function loadQuickActions() {
+    // Load quick actions from server
+    try {
+        const response = await fetch('/api/quick-actions/');
+        const data = await response.json();
+        quickActions = data;
+        console.log('Loaded quick actions from server:', quickActions);
+    } catch (error) {
+        console.error('Error loading quick actions:', error);
+        // Fallback to default actions if server fails
+        quickActions = [
+            { id: 1, icon: 'fas fa-plus', label: 'Add Task' },
+            { id: 2, icon: 'fas fa-clock', label: 'Due Today' },
+            { id: 3, icon: 'fas fa-star', label: 'High Priority' },
+            { id: 4, icon: 'fas fa-chart-bar', label: 'Report' }
+        ];
+    }
+}
+
+function getQuickActions() {
+    return quickActions;
+}
+
+function renderQuickActions() {
+    const quickActions = getQuickActions();
+    const container = document.getElementById('quickButtonsContainer');
+    
+    if (container) {
+        container.innerHTML = quickActions.map(action => {
+            // Get category from action_data or fallback to default categories
+            const category = action.action_data?.category || action.category || 'other';
+            const buttonId = `quick-btn-${action.label.replace(/\s+/g, '-').toLowerCase()}`;
+            return `
+                <button id="${buttonId}" class="quick-btn" onclick="addQuickTask('${action.label}', '${category}')">
+                    <i class="${action.icon}"></i> ${action.label}
+                </button>
+            `;
+        }).join('');
+    }
+}
+
+function renderQuickActionsList() {
+    const quickActions = getQuickActions();
+    const container = document.querySelector('.quick-actions-list');
+    
+    if (container) {
+        container.innerHTML = quickActions.map(action => `
+            <div class="quick-action-item">
+                <div class="action-info">
+                    <i class="${action.icon}"></i>
+                    <span>${action.label}</span>
+                </div>
+                <button class="remove-action-btn" onclick="removeQuickAction(${action.id})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `).join('');
+    }
+}
+
+function handleQuickAction(actionType) {
+    switch(actionType) {
+        case 'Add Task':
+            toggleModal();
+            break;
+        case 'Due Today':
+            filterTasksByDueDate('today');
+            break;
+        case 'High Priority':
+            filterTasksByPriority('high');
+            break;
+        case 'Report':
+            generateReport();
+            break;
+        default:
+            showToast(`${actionType} action triggered`, 'info');
+    }
+}
+
+function filterTasksByDueDate(filter) {
+    showToast(`Filtering tasks: ${filter}`, 'info');
+    // TODO: Implement actual filtering
+}
+
+function filterTasksByPriority(priority) {
+    showToast(`Filtering by ${priority} priority`, 'info');
+    // TODO: Implement actual filtering
+}
+
+function generateReport() {
+    showToast('Generating productivity report...', 'info');
+    // TODO: Implement actual report generation
+}
+
+function saveQuickActions() {
+    // Save current quick actions configuration
+    showToast('Quick actions saved!', 'success');
+    closeModal('quickActionsModal');
+}
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+    fetchTasks();
+    
+    // Set minimum date for due date input to today
+    const dueDateInput = document.getElementById('due_date');
+    if (dueDateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dueDateInput.min = today;
+    }
+    
+    // Update overdue tasks indicator every minute
+    setInterval(() => {
+        renderTasks();
+    }, 60000);
+
+    // Add form event listeners
+    const editProfileForm = document.getElementById('editProfileForm');
+    if (editProfileForm) {
+        editProfileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveProfile();
+        });
+    }
+
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            changePassword();
+        });
+    }
+
+    const newQuickActionForm = document.getElementById('newQuickActionForm');
+    if (newQuickActionForm) {
+        newQuickActionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            addQuickAction();
+        });
+    }
+
+    // Initialize on page load for profile features
+    async function initializeProfileFeatures() {
+        console.log('Initializing profile features...');
+        
+        try {
+            loadUserProfile();
+            await loadQuickActions();
+            renderQuickActions();
+            renderQuickActionsList();
+        } catch (error) {
+            console.error('Error initializing profile features:', error);
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal && modal.id) {
+                    closeModal(modal.id);
+                }
+            });
+        };
+
+        // Add keyboard support for confirmation modal
+        document.addEventListener('keydown', function(event) {
+            const confirmationModal = document.getElementById('confirmationModal');
+            if (confirmationModal && confirmationModal.style.display === 'flex') {
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    cancelConfirmation();
+                } else if (event.key === 'Enter') {
+                    event.preventDefault();
+                    proceedConfirmation();
+                }
+            }
+        });
+    }
+
+    // Debug function to check what elements exist
+    function debugElements() {
+        console.log('=== Element Debug ===');
+        console.log('Quick actions container:', document.getElementById('quickButtonsContainer'));
+        console.log('Quick actions list:', document.querySelector('.quick-actions-list'));
+        console.log('Profile avatar:', document.getElementById('profileAvatar'));
+        console.log('Default avatar:', document.getElementById('defaultAvatar'));
+        console.log('Pending count:', document.getElementById('pendingCount'));
+        console.log('In progress count:', document.getElementById('inProgressCount'));
+        console.log('Completed count:', document.getElementById('completedCount'));
+        console.log('Productivity score:', document.getElementById('productivityScore'));
+    }
+
+    // Profile dropdown functionality
+    function toggleProfileDropdown() {
+        const dropdown = document.querySelector('.profile-dropdown');
+        if (dropdown) {
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.querySelector('.profile-dropdown');
+        const trigger = document.querySelector('.profile-trigger');
+        
+        if (dropdown && trigger && !trigger.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    // Initialize profile features after DOM is ready
+    setTimeout(() => {
+        debugElements();
+        initializeProfileFeatures();
+    }, 100);
+    
+    // Refresh data periodically
+    setInterval(() => {
+        fetchTasks();
+    }, 300000); // Refresh every 5 minutes
+});
+
+</script>
+{% endblock %} 

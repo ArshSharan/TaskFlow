@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TaskFlow - Modern Task Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --gradient-start: #4f46e5;
+            --gradient-end: #7c3aed;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .navbar-brand i {
+            font-size: 1.5rem;
+            background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .navbar-brand span {
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .navbar-nav {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 2rem 2rem;
+        }
+
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-btn-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .profile-btn-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        .profile-avatar-nav {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--gradient-end));
+        }
+
+        .profile-avatar-nav img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-avatar-nav i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .dropdown-arrow {
+            font-size: 0.75rem;
+            transition: transform 0.2s ease;
+        }
+
+        .profile-dropdown.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .profile-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            min-width: 280px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1001;
+            margin-top: 0.5rem;
+        }
+
+        .profile-dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-info-dropdown {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .profile-info-dropdown h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+            color: var(--text-primary);
+        }
+
+        .profile-info-dropdown p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0 0 0.75rem 0;
+        }
+
+        .profile-stats-dropdown span {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--background-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 0;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            background: none;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+        }
+
+        .dropdown-item:hover {
+            background: var(--background-color);
+        }
+
+        .dropdown-item.logout-item {
+            color: var(--danger-color);
+        }
+
+        .dropdown-item.logout-item:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Profile Info Hover Card */
+        .profile-info-card {
+            position: absolute;
+            top: calc(100% + 1rem);
+            right: 0;
+            width: 320px;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .profile-name-hover:hover + .profile-info-card,
+        .profile-info-card:hover {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-card-header {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-avatar-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--gradient-end));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .profile-card-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-display-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .profile-card-email {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .profile-card-bio {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .profile-card-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--background-color);
+            border-radius: 0.75rem;
+        }
+
+        .profile-stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .profile-stat-value {
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .view-profile-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--gradient-end));
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .view-profile-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            border: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--border-color);
+            color: var(--text-secondary);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .card {
+            background: var(--card-background);
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{% url 'task_list' %}" class="navbar-brand">
+            <i class="fas fa-tasks"></i>
+            <span>TaskFlow</span>
+        </a>
+        <div class="navbar-nav">
+            {% if user.is_authenticated %}
+                <div class="profile-dropdown">
+                    <button class="profile-btn-nav" onclick="toggleProfileDropdown()">
+                        <div class="profile-avatar-nav" id="profileAvatarNav">
+                            <img id="profileImageNav" src="" alt="Profile" style="display: none;">
+                            <i class="fas fa-user-circle" id="defaultAvatarNav"></i>
+                        </div>
+                        <span class="profile-name-hover">{{ user.get_full_name|default:user.username }}</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    
+                    <!-- Profile Info Hover Card -->
+                    <div class="profile-info-card" id="profileInfoCard">
+                        <div class="profile-card-header">
+                            <div class="profile-avatar-large" id="navbarProfileAvatar">
+                                <img id="profileImageCardNav" src="" alt="Profile" style="display: none;">
+                                <i class="fas fa-user" id="navbarDefaultAvatar"></i>
+                            </div>
+                            <div class="profile-card-details">
+                                <h3 class="profile-display-name" id="profileCardName">{{ user.get_full_name|default:user.username }}</h3>
+                                <p class="profile-card-email" id="profileCardEmail">{{ user.email }}</p>
+                                <p class="profile-card-bio" id="profileCardBio">Click Edit Profile to add a bio</p>
+                            </div>
+                        </div>
+                        <div class="profile-card-stats">
+                            <div class="profile-stat-item">
+                                <span class="profile-stat-label">Member since</span>
+                                <span class="profile-stat-value">{{ user.date_joined|date:"M Y" }}</span>
+                            </div>
+                            <div class="profile-stat-item">
+                                <span class="profile-stat-label">Total Tasks</span>
+                                <span class="profile-stat-value" id="totalTasksCount">0</span>
+                            </div>
+                        </div>
+                        <button class="view-profile-btn" onclick="openModal('editProfileModal')">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                    </div>
+                    <div class="profile-dropdown-menu" id="profileDropdownMenu">
+                        <div class="profile-info-dropdown">
+                            <h4>{{ user.get_full_name|default:user.username }}</h4>
+                            <p>{{ user.email }}</p>
+                            <div class="profile-stats-dropdown">
+                                <span>Member since {{ user.date_joined|date:"M Y" }}</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="openModal('editProfileModal')">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                        <button class="dropdown-item" onclick="openModal('changePasswordModal')">
+                            <i class="fas fa-key"></i> Change Password
+                        </button>
+                        <button class="dropdown-item" onclick="openModal('quickActionsModal')">
+                            <i class="fas fa-bolt"></i> Quick Actions
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'logout' %}" class="dropdown-item logout-item">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login
+                </a>
+                <a href="{% url 'signup' %}" class="nav-link {% if request.resolver_match.url_name == 'signup' %}active{% endif %}">
+                    <i class="fas fa-user-plus"></i>
+                    Sign Up
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        // Profile dropdown functionality
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdownMenu');
+            const trigger = document.querySelector('.profile-btn-nav');
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+                profileDropdown.classList.remove('active');
+            } else {
+                dropdown.classList.add('show');
+                profileDropdown.classList.add('active');
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('profileDropdownMenu');
+            const trigger = document.querySelector('.profile-btn-nav');
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            
+            if (dropdown && trigger && !trigger.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('show');
+                profileDropdown.classList.remove('active');
+            }
+        });
+
+        // Profile hover card functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileName = document.querySelector('.profile-name-hover');
+            const profileCard = document.getElementById('profileInfoCard');
+            let hoverTimeout;
+
+            if (profileName && profileCard) {
+                profileName.addEventListener('mouseenter', function() {
+                    clearTimeout(hoverTimeout);
+                    profileCard.style.opacity = '1';
+                    profileCard.style.visibility = 'visible';
+                    profileCard.style.transform = 'translateY(0)';
+                });
+
+                profileName.addEventListener('mouseleave', function() {
+                    hoverTimeout = setTimeout(() => {
+                        if (!profileCard.matches(':hover')) {
+                            profileCard.style.opacity = '0';
+                            profileCard.style.visibility = 'hidden';
+                            profileCard.style.transform = 'translateY(-10px)';
+                        }
+                    }, 300);
+                });
+
+                profileCard.addEventListener('mouseenter', function() {
+                    clearTimeout(hoverTimeout);
+                });
+
+                profileCard.addEventListener('mouseleave', function() {
+                    profileCard.style.opacity = '0';
+                    profileCard.style.visibility = 'hidden';
+                    profileCard.style.transform = 'translateY(-10px)';
+                });
+            }
+        });
+
+        // Modal functionality
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                
+                // Close dropdown when opening modal
+                const dropdown = document.getElementById('profileDropdownMenu');
+                const trigger = document.querySelector('.profile-trigger');
+                if (dropdown && trigger) {
+                    dropdown.classList.remove('show');
+                    trigger.classList.remove('active');
+                }
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        };
+    </script>
+</body>
+</html> 
