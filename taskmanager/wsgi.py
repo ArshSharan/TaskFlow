@@ -11,6 +11,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
+# Use production settings if DJANGO_SETTINGS_MODULE is set in environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'taskmanager.settings')
 
 application = get_wsgi_application()
