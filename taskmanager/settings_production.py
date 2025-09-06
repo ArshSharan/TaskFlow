@@ -6,21 +6,38 @@ from .settings import *
 import os
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# Enable DEBUG temporarily for troubleshooting 400 errors
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
+# Enable template debugging
+if DEBUG:
+    TEMPLATES[0]['OPTIONS']['debug'] = True
 
 # Add your Render domain here
+# Get the allowed hosts from environment variable for flexibility
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 ALLOWED_HOSTS = [
-    '*.onrender.com',  # This will work with any Render subdomain
-    'taskflow-django.onrender.com',  # Replace with your actual Render domain
     'localhost',
     '127.0.0.1',
 ]
 
-# Security settings for production
-SECURE_SSL_REDIRECT = True
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# Add Render hostname if available
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Also add common Render patterns
+ALLOWED_HOSTS.extend([
+    'taskflow-django.onrender.com',
+    'django-mariadb-app.onrender.com',
+    'taskflow.onrender.com',
+])
+
+# Security settings for production (relaxed for initial deployment)
+# Note: Enable these gradually once basic functionality works
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True'
+SECURE_HSTS_SECONDS = 31536000 if SECURE_SSL_REDIRECT else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_SSL_REDIRECT
+SECURE_HSTS_PRELOAD = SECURE_SSL_REDIRECT
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
@@ -67,12 +84,20 @@ if 'TIDB_SSL_CERT_B64' in os.environ:
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# CORS settings for production
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    "https://*.onrender.com",  # This will work with any Render subdomain
-    "https://taskflow-django.onrender.com",  # Replace with your actual domain
-]
+# CORS settings for production (initially permissive for debugging)
+CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'True') == 'True'
+CORS_ALLOWED_ORIGINS = []
+
+# If not allowing all origins, specify allowed origins
+if not CORS_ALLOW_ALL_ORIGINS:
+    CORS_ALLOWED_ORIGINS = [
+        "https://taskflow-django.onrender.com",
+        "https://django-mariadb-app.onrender.com", 
+        "https://taskflow.onrender.com",
+    ]
+    # Add the render hostname if available
+    if RENDER_EXTERNAL_HOSTNAME:
+        CORS_ALLOWED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
 
 # Logging configuration
 LOGGING = {
