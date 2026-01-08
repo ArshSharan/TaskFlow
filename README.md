@@ -1,4 +1,4 @@
-# 🌟 TaskFlow - Modern Task Management
+# TaskFlow - Modern Task Management
 
 A sleek, full-featured task management web application built with **Django**, **TiDB Cloud**, and a beautiful interactive frontend. Organize your tasks, track progress, and boost your productivity with secure cloud-based data storage.
 
@@ -9,29 +9,29 @@ A sleek, full-featured task management web application built with **Django**, **
 
 ---
 
-## ✨ Features
+## Features
 
-### 🎯 Task Management
-- 📝 **Full CRUD Operations**: Create, read, update, and delete tasks seamlessly
-- 🏷️ **Categories & Priorities**: Organize tasks with custom categories and priority levels
-- 📅 **Due Dates**: Set and track task deadlines
-- ✅ **Status Tracking**: Monitor task progress (Pending, In Progress, Completed)
+### Task Management
+- **Full CRUD Operations**: Create, read, update, and delete tasks seamlessly
+- **Categories & Priorities**: Organize tasks with custom categories and priority levels
+- **Due Dates**: Set and track task deadlines
+- **Status Tracking**: Monitor task progress (Pending, In Progress, Completed)
 
-### 🔐 User Experience
-- 🔒 **Secure Authentication**: User registration, login, and profile management
-- 👤 **Personal Profiles**: Upload profile photos and manage user information
-- ⚡ **Real-time Updates**: Dynamic task updates without page reloads
-- � **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+### User Experience
+- **Secure Authentication**: User registration, login, and profile management
+- **Personal Profiles**: Upload profile photos and manage user information
+- **Real-time Updates**: Dynamic task updates without page reloads
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 
-### 🎨 Modern Interface
-- 🌈 **Beautiful UI**: Card-based design with intuitive color coding
-- 🎭 **Interactive Elements**: Smooth animations and hover effects
-- 📊 **Dashboard Analytics**: Task statistics and progress visualization
-- 🚀 **Quick Actions**: Fast task creation and management shortcuts
+### Modern Interface
+- **Beautiful UI**: Card-based design with intuitive color coding
+- **Interactive Elements**: Smooth animations and hover effects
+- **Dashboard Analytics**: Task statistics and progress visualization
+- **Quick Actions**: Fast task creation and management shortcuts
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Backend
 - **Framework**: Django 5.2.3
@@ -54,7 +54,7 @@ A sleek, full-featured task management web application built with **Django**, **
 
 ---
 
-## � Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.8+
@@ -125,28 +125,11 @@ Visit **http://127.0.0.1:8000** to start using TaskFlow!
 
 ---
 
-## 🌐 Live Demo
+## Live Demo
 
-Check out the live application: **[TaskFlow on Render](https://your-app-name.onrender.com)**
-
----
-
-## � Screenshots
-
-### Dashboard
-![Dashboard](docs/screenshots/dashboard.png)
-*Clean, intuitive dashboard with task overview and quick actions*
-
-### Task Management
-![Task Management](docs/screenshots/tasks.png)
-*Comprehensive task creation and management interface*
-
-### User Profile
-![Profile](docs/screenshots/profile.png)
-*Personalized user profiles with photo upload*
+Check out the live application: **[TaskFlow on Render](https://taskflow-wrw6.onrender.com/)**
 
 ---
-
 ## 🔗 API Documentation
 
 ### Authentication Required
@@ -176,65 +159,9 @@ All API endpoints require user authentication via Django sessions.
 | `POST` | `/api/quick-actions/` | Create quick action |
 
 ---
-
-## 🚀 Deployment
-
-### Deploy to Render
-
-1. **Fork this repository**
-
-2. **Connect to Render**:
-   - Go to [Render.com](https://render.com)
-   - Connect your GitHub account
-   - Create new Web Service
-
-3. **Configure deployment**:
-   - **Build Command**: `./build.sh`
-   - **Start Command**: `gunicorn taskmanager.wsgi:application`
-
-4. **Set environment variables** in Render:
-   ```
-   DJANGO_SECRET_KEY=your-production-secret-key
-   DJANGO_SETTINGS_MODULE=taskmanager.settings_production
-   DB_NAME=your-tidb-database
-   DB_USER=your-tidb-user
-   DB_PASSWORD=your-tidb-password
-   DB_HOST=your-tidb-host
-   DB_PORT=4000
-   DB_SSL_CA=./certs/ca-cert.pem
-   ```
-
-5. **Deploy**: Click "Create Web Service" and wait for deployment!
-
 ---
 
-## 🏗️ Project Structure
-
-```
-TaskFlow/
-├── 📁 taskmanager/          # Django project settings
-│   ├── settings.py          # Development settings
-│   ├── settings_production.py # Production settings
-│   ├── urls.py             # URL routing
-│   └── wsgi.py             # WSGI application
-├── 📁 tasks/               # Main application
-│   ├── 📁 models/          # Data models
-│   ├── 📁 views/           # API views
-│   ├── 📁 serializers/     # DRF serializers
-│   ├── 📁 templates/       # HTML templates
-│   ├── 📁 static/          # CSS, JS, images
-│   └── 📁 migrations/      # Database migrations
-├── 📁 static/              # Static files
-├── 📁 media/               # User uploads
-├── 📁 certs/               # SSL certificates
-├── 📄 requirements.txt     # Python dependencies
-├── 📄 build.sh            # Render build script
-└── 📄 README.md           # This file
-```
-
----
-
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please follow these steps:
 
@@ -262,18 +189,18 @@ We welcome contributions! Please follow these steps:
 
 ---
 
-## 📋 Future Prospects
+## Future Prospects
 
-- [ ] 📧 Email notifications for due dates
-- [ ] 🔄 Task templates and recurring tasks
-- [ ] 👥 Team collaboration features
-- [ ] 📈 Advanced analytics and reporting
-- [ ] 📱 Mobile app (React Native)
-- [ ] 🔌 Third-party integrations (Calendar, Slack)
+- [ ] Email notifications for due dates
+- [ ] Task templates and recurring tasks
+- [ ] Team collaboration features
+- [ ] Advanced analytics and reporting
+- [ ] Mobile app (React Native)
+- [ ] Third-party integrations (Calendar, Slack)
 
 ---
 
-## ⚠️ Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -296,13 +223,13 @@ python manage.py migrate
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## � Acknowledgments
+## Acknowledgments
 
 - **[Django](https://djangoproject.com)** - The web framework for perfectionists
 - **[TiDB Cloud](https://tidbcloud.com)** - Scalable, cloud-native database
@@ -311,19 +238,5 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - **[Google Fonts](https://fonts.google.com)** - Typography
 
 ---
-
-## 📞 Support
-
-- 🐛 **Issues**: [GitHub Issues](https://github.com/ArshSharan/TaskFlow/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/ArshSharan/TaskFlow/discussions)
-- 📧 **Email**: arshsharan06@gmail.com
-
----
-
-<div align="center">
-
-**⭐ Star this repo if you find it useful!**
-
-Made with ❤️ by [Arsh Sharan](https://github.com/ArshSharan)
 
 </div>
